@@ -3,10 +3,17 @@ import { View, Text, StyleSheet } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 //
 import PinInsert from "../images/Pin.png";
 
 const Home: React.FC = () => {
+  const navigation = useNavigation();
+
+  function handleTooltipClick() {
+    navigation.navigate("accenture");
+  }
+
   return (
     <View style={styles.container}>
       <MapView
@@ -26,9 +33,9 @@ const Home: React.FC = () => {
             latitude: -22.955721,
           }}
         >
-          <Callout tooltip={true} onPress={() => alert("wow")}>
+          <Callout tooltip={true} onPress={handleTooltipClick}>
             <View style={styles.calloutContainer}>
-              <Text style={styles.calloutText}>Wow</Text>
+              <Text style={styles.calloutText}>Unidade RJ</Text>
             </View>
           </Callout>
         </Marker>
