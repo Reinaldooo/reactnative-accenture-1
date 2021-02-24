@@ -1,37 +1,77 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Image } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
+import { RectButton, ScrollView } from "react-native-gesture-handler";
 import { Feather } from "@expo/vector-icons";
-
+import { useNavigation, useRoute } from "@react-navigation/native";
+//
 import AccentureLogo from "../images/Accenture.png";
+import { ILocationParams, ILocation } from "../interfaces";
+import { getData } from "../services";
 
 export default function Accenture() {
+  const [location, setLocation] = useState<ILocation>();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const params = route.params as ILocationParams;
+
+  useEffect(() => {
+    getData(`find?id=${params.id}`).then(({ data }) => setLocation(data));
+  }, [params.id]);
+
+  function handleContactButton() {
+    navigation.navigate("contact");
+  }
+
   return (
-    <View style={styles.container}>
-      <Image style={styles.logo} source={AccentureLogo} />
-      <Text style={styles.title}>Accenture</Text>
-      <Text style={styles.paragraph}>
-        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Mollitia
-        debitis temporibus, laudantium atque quasi asperiores repellat
-      </Text>
-      <RectButton onPress={() => alert("Hello!")} style={styles.contactButton}>
-        <Text style={styles.textButton}>Entrar em contato</Text>
-        <Feather name="send" size={20} />
-      </RectButton>
-    </View>
+    <ScrollView>
+      <View style={styles.container}>
+        {location && (
+          <>
+            <Image
+              style={styles.topImage}
+              source={{
+                uri:
+                  "https://startupi.com.br/wp-content/uploads/2020/01/accenture-1.jpg",
+              }}
+            />
+            <Image style={styles.logo} source={AccentureLogo} />
+            <Text style={styles.title}>{location.city}</Text>
+            <Text style={styles.paragraph}>{location.describle}</Text>
+            <Text style={styles.details}>País: {location.country}</Text>
+            <Text style={styles.details}>Estado: {location.state}</Text>
+            <Text style={styles.details}>Cidade: {location.city}</Text>
+            <Text style={styles.details}>
+              Endereço:{" "}
+              {`${location.address.street}, ${location.address.number}`}
+            </Text>
+            <RectButton
+              onPress={handleContactButton}
+              style={styles.contactButton}
+            >
+              <Text style={styles.textButton}>Entrar em contato</Text>
+              <Feather name="send" size={20} color="#A100FF" />
+            </RectButton>
+          </>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    justifyContent: "center",
     flex: 1,
+    paddingBottom: 50,
+  },
+  topImage: {
+    height: 200,
+    width: "100%",
   },
   logo: {
-    marginBottom: 20,
-    height: 80,
-    width: 300,
+    marginVertical: 20,
+    height: 53,
+    width: 202,
   },
   title: {
     fontSize: 24,
@@ -48,11 +88,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
+    marginTop: 20,
   },
   textButton: {
     justifyContent: "center",
+    fontSize: 20,
     alignItems: "center",
     color: "#A100FF",
     margin: 10,
+  },
+  details: {
+    fontSize: 17,
+    marginVertical: 5,
   },
 });

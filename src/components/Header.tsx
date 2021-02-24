@@ -4,9 +4,9 @@ import { BorderlessButton } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 //
-import { HeaderProps } from "../interfaces";
+import { IHeaderProps } from "../interfaces";
 
-export default function Header({ title, showCancel = true }: HeaderProps) {
+export default function Header({ title, showCancel = true }: IHeaderProps) {
   const navigation = useNavigation();
 
   function handleClose() {

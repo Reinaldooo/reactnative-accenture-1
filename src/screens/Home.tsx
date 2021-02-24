@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
@@ -6,40 +6,71 @@ import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 //
 import PinInsert from "../images/Pin.png";
+import { IInitialMarker, ILocation } from "../interfaces";
+import { getData } from "../services";
 
 const Home: React.FC = () => {
+  const [allLocations, setLocations] = useState<ILocation[]>([]);
+  const [
+    initialMapMarker,
+    setInitialMapMarker,
+  ] = useState<IInitialMarker | null>(null);
   const navigation = useNavigation();
 
-  function handleTooltipClick() {
-    navigation.navigate("accenture");
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(({ coords }) =>
+      setInitialMapMarker({
+        longitude: coords.longitude,
+        latitude: coords.latitude,
+        longitudeDelta: 0.015,
+        latitudeDelta: 0.015,
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    if (initialMapMarker) {
+      getData("/all")
+        .then(({ data }) => {
+          setLocations(data);
+        })
+        .catch(() => console.log("Error fetching locations"));
+    }
+  }, [initialMapMarker]);
+
+  function handleTooltipClick(id: number) {
+    navigation.navigate("accenture", { id });
   }
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={{
-          longitude: -42.787885,
-          latitude: -22.955721,
-          longitudeDelta: 0.015,
-          latitudeDelta: 0.015,
-        }}
-      >
-        <Marker
-          icon={PinInsert}
-          coordinate={{
-            longitude: -42.787885,
-            latitude: -22.955721,
-          }}
+      {initialMapMarker && (
+        <MapView
+          style={styles.map}
+          provider={PROVIDER_GOOGLE}
+          initialRegion={initialMapMarker}
         >
-          <Callout tooltip={true} onPress={handleTooltipClick}>
-            <View style={styles.calloutContainer}>
-              <Text style={styles.calloutText}>Unidade RJ</Text>
-            </View>
-          </Callout>
-        </Marker>
-      </MapView>
+          {allLocations.map((location) => (
+            <Marker
+              key={location.id}
+              icon={PinInsert}
+              coordinate={{
+                longitude: location.longitude,
+                latitude: location.latitude,
+              }}
+            >
+              <Callout
+                tooltip={true}
+                onPress={() => handleTooltipClick(location.id)}
+              >
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutText}>{location.name}</Text>
+                </View>
+              </Callout>
+            </Marker>
+          ))}
+        </MapView>
+      )}
       <View style={styles.footer}>
         <Text style={styles.footerText}>Texto</Text>
         <RectButton style={styles.footerButton}>
