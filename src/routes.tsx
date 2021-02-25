@@ -6,6 +6,7 @@ import Home from "./screens/Home";
 import Accenture from "./screens/Accenture";
 import Contact from "./screens/Contact";
 import Header from "./components/Header";
+import Storage from "./screens/Storage";
 
 const { Navigator, Screen } = createStackNavigator();
 
@@ -23,7 +24,7 @@ export default function Route() {
           component={Contact}
           options={{
             headerShown: true,
-            header: () => <Header title={"Contact"} showCancel={true} />,
+            header: () => <Header title="Contact" showCancel={true} />,
           }}
         />
         <Screen name="home" component={Home} />
@@ -32,7 +33,15 @@ export default function Route() {
           component={Accenture}
           options={{
             headerShown: true,
-            header: () => <Header title={"Accenture"} showCancel={true} />,
+            header: () => <Header title="Accenture" showCancel={true} />,
+          }}
+        />
+        <Screen
+          name="storage"
+          component={Storage}
+          options={{
+            headerShown: true,
+            header: () => <Header title="Storage" showCancel={true} />,
           }}
         />
       </Navigator>

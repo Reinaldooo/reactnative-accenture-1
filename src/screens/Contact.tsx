@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { StyleSheet, View, Text, Image } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+} from "react-native";
 import LottieView from "lottie-react-native";
 import { Feather } from "@expo/vector-icons";
 import {
@@ -9,17 +17,50 @@ import {
 } from "react-native-gesture-handler";
 //
 import Logo from "../images/Accenture.png";
+import { contactSend } from "../services";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 
 export default function Contact() {
+  const navigation = useNavigation();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [messageSent, setMessageSent] = useState(true);
+  const [messageSent, setMessageSent] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("blur", () => {
+      setMessageSent(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  function sendMessage() {
+    const postData = {
+      name,
+      phone,
+      email,
+      message,
+    };
+    contactSend.post("", postData).then(() => {
+      setMessageSent(true);
+      setName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+    });
+  }
+
+  function openStorage() {
+    navigation.navigate("storage");
+  }
 
   return (
     <ScrollView style={styles.scrollView}>
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         {messageSent ? (
           <>
             <Text style={styles.sentText}>Sua mensagem foi enviada! :)</Text>
@@ -36,21 +77,38 @@ export default function Contact() {
             <Text style={styles.title}>Formulário de contato</Text>
             <View>
               <Text style={styles.labelForm}>Seu nome:</Text>
-              <TextInput style={styles.inputForm} />
+              <TextInput
+                style={styles.inputForm}
+                onChangeText={(text) => setName(text)}
+              />
               <Text style={styles.labelForm}>Seu telefone:</Text>
-              <TextInput style={styles.inputForm} />
+              <TextInput
+                style={styles.inputForm}
+                onChangeText={(text) => setPhone(text)}
+              />
               <Text style={styles.labelForm}>Seu email:</Text>
-              <TextInput style={styles.inputForm} />
+              <TextInput
+                style={styles.inputForm}
+                onChangeText={(text) => setEmail(text)}
+              />
               <Text style={styles.labelForm}>Deixe sua mensagem:</Text>
-              <TextInput style={styles.inputFormMultiline} multiline />
-              <RectButton style={styles.sendButton}>
+              <TextInput
+                style={styles.inputFormMultiline}
+                multiline
+                onChangeText={(text) => setMessage(text)}
+              />
+              <RectButton style={styles.sendButton} onPress={sendMessage}>
                 <Text style={styles.textSendButton}>Enviar Mensagem</Text>
+                <Feather name="send" size={20} color="#A100FF" />
+              </RectButton>
+              <RectButton style={styles.sendButton} onPress={openStorage}>
+                <Text style={styles.textSendButton}>Abrir Storage</Text>
                 <Feather name="send" size={20} color="#A100FF" />
               </RectButton>
             </View>
           </>
         )}
-      </View>
+      </KeyboardAvoidingView>
     </ScrollView>
   );
 }
@@ -60,7 +118,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 50,
+    height: Dimensions.get("window").height + 200,
   },
   scrollView: {
     width: "100%",

@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Image } from "react-native";
 import { RectButton, ScrollView } from "react-native-gesture-handler";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 //
 import AccentureLogo from "../images/Accenture.png";
 import { ILocationParams, ILocation } from "../interfaces";
@@ -14,8 +15,22 @@ export default function Accenture() {
   const route = useRoute();
   const params = route.params as ILocationParams;
 
+  const storageData = async (value: string): Promise<void> => {
+    if (typeof value !== "string") {
+      value = JSON.stringify(value);
+    }
+    try {
+      await AsyncStorage.setItem("@accentureLocation", value);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
-    getData(`find?id=${params.id}`).then(({ data }) => setLocation(data));
+    getData(`find?id=${params.id}`).then(({ data }) => {
+      storageData(data);
+      setLocation(data);
+    });
   }, [params.id]);
 
   function handleContactButton() {
